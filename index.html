@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel = "stylesheet"
+          type = "text/css"
+          href = "styles.css" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <title>Raijin</title>
+  </head>
+  <body>
+    <h1>Raijin</h1>
+
+
+
+    <div id="submitButton">
+      <form action="" method="post">
+        Input Something ...<br>
+        <input id="userInput" type="text" value="type here..."><br>
+      </form>
+      <button onclick="captureUserInput()">Click to Submit</button>
+    </div>
+
+
+    <ul id="myList">
+      <li>111</li>
+      <li>222</li>
+      <li>333</li>
+    </ul>
+
+    <script>
+    /*
+      Here I'm trying to deal with page refreshes.
+      I want to get everything we have on the database
+      and bring it here for the DOM...
+    */
+    window.onload = () => {
+      console.log('WINDOW IS LOADED');
+      //I'll start with a sample array.
+      let sample = ['ken', 'ryu', 'chunli', 'vega'];
+
+      /*now this helper function take anything in the
+      sample array and make list items... Now if I could
+      just get need to get a REAL array.
+      */
+      let initialListItems = (arr) => {
+        for (let i = 0; i<sample.length; i++) {
+          let local = sample[i];
+          let newListItem = document.createElement("li");
+          let node = document.createTextNode(local);
+          newListItem.appendChild(node);
+          let element = document.getElementById("myList");
+          element.appendChild(newListItem);
+        }
+        return undefined;
+      }
+      initialListItems(sample);
+
+
+
+
+
+    };
+
+
+
+
+
+      // This function gets fired on our buttonClick
+      function captureUserInput() {
+
+        //log user input to the console...
+        let input = document.getElementById("userInput").value;
+        console.log('here is user text---', input);
+
+        //now lets add a <li> to our dom with req.body.input as the value
+        //I would rather this get updated from our server directly
+        //but this is a step for now to keep moving forward.
+        //the reason this breaks is that if you refresh the page,
+        //  you lose your dom elements..
+        //  at least this is here if we need it.
+        // let newListItem = document.createElement("li");
+        // var node = document.createTextNode(input);
+        // newListItem.appendChild(node);
+        // let element = document.getElementById("myList");
+        // element.appendChild(newListItem);
+
+        //now we send a POST request to the server.
+        //Eric F helped me a ton with this part.
+        fetch('http://localhost:3000/addTodos', {
+          method: 'POST',
+          body: JSON.stringify({
+            input: input
+          }),
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          })
+        }).then(res=> res.json())
+          .then(res =>{
+            /*Zihao helped me conceptualize this part
+              Ultimately I shouldn't be writing to the dom
+              without getting the data straight from the
+              database first, but still... this is a first step.
+              atleast I'm waiting until we get data from the
+              server. Baby steps.
+
+              My slice is just because this thing comes in
+              as JSON where the key is "input"... so the
+              first 9 characters are useless to me.
+            */
+            let local = res.slice(10,res.length-2)
+            let newListItem = document.createElement("li");
+            let node = document.createTextNode(local);
+            newListItem.appendChild(node);
+            let element = document.getElementById("myList");
+            element.appendChild(newListItem);
+          })
+          .catch(error => console.error('Error...', error))
+          .then(response => console.log('Success...', response))
+
+
+      }//close captureUserInput()
+
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
